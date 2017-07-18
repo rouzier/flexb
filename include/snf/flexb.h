@@ -1,5 +1,5 @@
-#ifndef __ONO_FLEXBUFFERS__
-#define __ONO_FLEXBUFFERS__
+#ifndef __SNF_FLEXBUFFERS__
+#define __SNF_FLEXBUFFERS__
 
 #include <stdint.h>
 #include <stdlib.h>
@@ -12,14 +12,14 @@
 #define FLEXB_UINT  2
 #define FLEXB_FLOAT 3
 
-typedef struct ONO_flexb_ref {
+typedef struct SNF_flexb_ref {
     const uint8_t * data;
     uint8_t parent_width;
     uint8_t byte_width;
     uint8_t type;
-} ONO_flexb_ref;
+} SNF_flexb_ref;
 
-inline int ono_flexb_set_root( const char* root, size_t length, ONO_flexb_ref* ref) {
+inline int snf_flexb_set_root( const char* root, size_t length, SNF_flexb_ref* ref) {
     if (root == NULL || ref == NULL || length < 3) {
         return EINVAL;
     }
@@ -34,7 +34,7 @@ inline int ono_flexb_set_root( const char* root, size_t length, ONO_flexb_ref* r
     return 0;
 }
 
-inline int64_t ono_flexb_get_int64(const char* data, int width) {
+inline int64_t snf_flexb_get_int64(const char* data, int width) {
     int64_t num;
     switch (width) {
     case 1:
@@ -69,10 +69,10 @@ inline int64_t ono_flexb_get_int64(const char* data, int width) {
     return num;
 }
 
-inline int ono_flexb_as_int64(ONO_flexb_ref* ref, int64_t *num) {
+inline int snf_flexb_as_int64(SNF_flexb_ref* ref, int64_t *num) {
     switch(ref->type) {
     case FLEXB_INT:
-        *num = ono_flexb_get_int64(ref->data, ref->parent_width);
+        *num = snf_flexb_get_int64(ref->data, ref->parent_width);
         return 0;
     }
     return 1;

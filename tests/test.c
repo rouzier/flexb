@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
-#include "ono/flexb.h"
+#include "snf/flexb.h"
 
 int tests_failed = 0;
 int tests_passed = 0;
@@ -32,14 +32,20 @@ void int_tests() {
     static uint8_t regular_int_bytes[] = {1,0,0,0,4,4}; // 0x01000000
     static uint8_t big_int_bytes[]     = {1,0,0,0,0,0,0,0,4,8}; // 0x0100000000000000
     int64_t num = 0;
-    ONO_flexb_ref root;
-    IS_OK(ono_flexb_set_root(small_int_bytes, 3, &root) == 0);
-    IS_OK(ono_flexb_as_int64(&root, &num) == 0);
+    SNF_flexb_ref root;
+    IS_OK(snf_flexb_set_root(small_int_bytes, 3, &root) == 0);
+    IS_OK(snf_flexb_as_int64(&root, &num) == 0);
+    IS_OK(num == 1);
+
+    IS_OK(snf_flexb_set_root(short_int_bytes, 4, &root) == 0);
+    IS_OK(snf_flexb_as_int64(&root, &num) == 0);
+    IS_OK(num == 0x100);
 
 }
 
 int main() {
     int results = 0;
+    int_tests();
 
     if (tests_failed) {
         results = 1;
