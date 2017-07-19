@@ -71,10 +71,48 @@ inline int64_t snf_flexb_get_int64(const uint8_t* data, int width) {
     return num;
 }
 
+inline uint64_t snf_flexb_get_uint64(const uint8_t* data, int width) {
+    uint64_t num;
+    switch (width) {
+    case 1:
+        {
+           uint8_t tmp;
+           memcpy(&tmp, data, 1);
+           num = tmp;
+        }
+       break;
+    case 2:
+        {
+           uint16_t tmp;
+           memcpy(&tmp, data, 2);
+           num = tmp;
+        }
+       break;
+    case 4:
+        {
+           uint32_t tmp;
+           memcpy(&tmp, data, 4);
+           num = tmp;
+        }
+       break;
+    case 8:
+        {
+           memcpy(&num, data, 8);
+        }
+       break;
+    default:
+        assert(0);
+    }
+    return num;
+}
+
 inline int snf_flexb_as_int64(SNF_flexb_ref* ref, int64_t *num) {
     switch(ref->type) {
     case FLEXB_INT:
         *num = snf_flexb_get_int64(ref->data, ref->parent_width);
+        return 0;
+    case FLEXB_UINT:
+        *num = (int64_t)snf_flexb_get_uint64(ref->data, ref->parent_width);
         return 0;
     }
     return 1;
