@@ -6,6 +6,8 @@
 #include <errno.h>
 #include <string.h>
 #include <assert.h>
+#include <stdio.h>
+
 
 #define FLEXB_NULL  0
 #define FLEXB_INT   1
@@ -24,9 +26,9 @@ inline int snf_flexb_set_root( const char* root, size_t length, SNF_flexb_ref* r
         return EINVAL;
     }
 
-    const uint8_t* end = root + length;
-    const uint8_t byte_width = *--end;
-    const uint8_t packed_byte = *--end;
+    const uint8_t* end = (const uint8_t*)(root + length);
+    const uint8_t byte_width = (uint8_t) *--end;
+    const uint8_t packed_byte = (uint8_t)*--end;
     ref->byte_width = byte_width;
     ref->type = (packed_byte >> 2);
     ref->parent_width  = 1 << (packed_byte & 0x03);
@@ -34,35 +36,35 @@ inline int snf_flexb_set_root( const char* root, size_t length, SNF_flexb_ref* r
     return 0;
 }
 
-inline int64_t snf_flexb_get_int64(const char* data, int width) {
+inline int64_t snf_flexb_get_int64(const uint8_t* data, int width) {
     int64_t num;
     switch (width) {
     case 1:
         {
            int8_t tmp;
            memcpy(&tmp, data, 1);
-           num = (int64_t) tmp;
+           num = tmp;
         }
-        return ;
+       break;
     case 2:
         {
            int16_t tmp;
            memcpy(&tmp, data, 2);
-           num = (int64_t) tmp;
+           num = tmp;
         }
-        return 0;
+       break;
     case 4:
         {
            int32_t tmp;
            memcpy(&tmp, data, 4);
-           num = (int64_t) tmp;
+           num = tmp;
         }
-        return 0;
+       break;
     case 8:
         {
            memcpy(&num, data, 8);
         }
-        return 0;
+       break;
     default:
         assert(0);
     }
