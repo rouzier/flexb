@@ -27,19 +27,27 @@ void test_ok(int passed, const char* test, const char* file, int line) {
 #define IS_OK(exp) do{ test_ok((exp), #exp, __FILE__, __LINE__); } while(0)
 
 void int_tests() {
-    static uint8_t small_int_bytes[]   = {1,4,1}; // 0x01
-    static uint8_t short_int_bytes[]   = {1,0,4,2}; // 0x0100
-    static uint8_t regular_int_bytes[] = {1,0,0,0,4,4}; // 0x01000000
-    static uint8_t big_int_bytes[]     = {1,0,0,0,0,0,0,0,4,8}; // 0x0100000000000000
+    static char byte_int_bytes[]  = {1,4,1}; // 0x01
+    static char short_int_bytes[] = {1,2,5,2}; // 0x0201
+    static char int_bytes[]       = {1,2,3,4,6,4}; // 0x04030201
+    static char long_int_bytes[]  = {1,2,3,4,5,6,7,8,7,8}; // 0x0100000000000000
     int64_t num = 0;
     SNF_flexb_ref root;
-    IS_OK(snf_flexb_set_root(small_int_bytes, 3, &root) == 0);
+    IS_OK(snf_flexb_set_root(byte_int_bytes, 3, &root) == 0);
     IS_OK(snf_flexb_as_int64(&root, &num) == 0);
     IS_OK(num == 1);
 
     IS_OK(snf_flexb_set_root(short_int_bytes, 4, &root) == 0);
     IS_OK(snf_flexb_as_int64(&root, &num) == 0);
-    IS_OK(num == 0x100);
+    IS_OK(num == 0x0201);
+
+    IS_OK(snf_flexb_set_root(int_bytes, 6, &root) == 0);
+    IS_OK(snf_flexb_as_int64(&root, &num) == 0);
+    IS_OK(num == 0x04030201);
+
+    IS_OK(snf_flexb_set_root(long_int_bytes, 10, &root) == 0);
+    IS_OK(snf_flexb_as_int64(&root, &num) == 0);
+    IS_OK(num == 0x0807060504030201);
 
 }
 
