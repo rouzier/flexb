@@ -1,5 +1,5 @@
-#ifndef __SNF_FLEXBUFFERS__
-#define __SNF_FLEXBUFFERS__
+#ifndef __FLEXB_FLEXB__
+#define __FLEXB_FLEXB__
 
 #include <stdint.h>
 #include <stdlib.h>

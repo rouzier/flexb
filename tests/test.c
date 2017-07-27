@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
-#include "snf/flexb.h"
+#include "flexb/flexb.h"
 
 int tests_failed = 0;
 int tests_passed = 0;
