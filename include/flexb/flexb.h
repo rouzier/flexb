@@ -76,9 +76,8 @@ typedef struct SNF_flexb_vec {
 } SNF_flexb_vec;
 
 typedef struct SNF_flexb_map {
-    SNF_flexb_vec vec;
-    const void * keys;
-    uint8_t keys_byte_length;
+    SNF_flexb_vec values;
+    SNF_flexb_vec keys;
 } SNF_flexb_map;
 
 
@@ -349,12 +348,14 @@ inline int snf_flexb_as_map(const void* root, SNF_flexb_ref* ref, SNF_flexb_map 
     const void* data = _snf_flexb_indirect(ref->data, ref->parent_width);
     const void* keys_offset = data - (vec.byte_width * 3);
     if (root != NULL && keys_offset < root) {
-        return EINVAL;
+        return FLEXB_CORRUPTED;
     }
-    map->vec = vec;
-    map->keys = _snf_flexb_indirect(keys_offset, map->vec.byte_width);
-    const void* keys_width_offset = keys_offset + map->vec.byte_width;
-    map->keys_byte_length = snf_flexb_get_uint64(keys_width_offset, map->vec.byte_width);
+    map->values = vec;
+    map->keys.data = _snf_flexb_indirect(keys_offset, map->values.byte_width);
+    const void* keys_width_offset = keys_offset + map->values.byte_width;
+    map->keys.byte_width = snf_flexb_get_uint64(keys_width_offset, map->values.byte_width);
+    map->keys.type = FLEXB_KEY;
+    map->keys.length =  vec.length;
     return FLEXB_SUCCESS;
 }
 
@@ -373,7 +374,7 @@ inline int snf_flexb_map_get_ref(const void* root, SNF_flexb_map *map, const cha
         return EINVAL;
     }
     int (*compar)(const void *, const void *) = NULL;
-    switch(map->keys_byte_length) {
+    switch(map->keys.byte_width) {
         case 1:
             compar = &_cmp_1_byte_vector;
             break;
@@ -389,13 +390,13 @@ inline int snf_flexb_map_get_ref(const void* root, SNF_flexb_map *map, const cha
         default:
             return FLEXB_CORRUPTED;
     }
-    const void* item = bsearch(key, map->keys, map->vec.length, map->keys_byte_length, compar);
+    const void* item = bsearch(key, map->keys.data, map->keys.length, map->keys.byte_width, compar);
     if (item == NULL) {
         return FLEXB_NOT_FOUND;
     }
-    size_t index = (size_t)(item - map->keys) / map->keys_byte_length;
-    uint8_t packed_byte = *(const uint8_t*)(map->vec.data + (map->vec.byte_width * map->vec.length) + index);
-    SET_REF(ref, map->vec.data + (map->vec.byte_width * index), map->vec.byte_width, packed_byte);
+    size_t index = (size_t)(item - map->keys.data) / map->keys.byte_width;
+    uint8_t packed_byte = *(const uint8_t*)(map->values.data + (map->values.byte_width * map->values.length) + index);
+    SET_REF(ref, map->values.data + (map->values.byte_width * index), map->values.byte_width, packed_byte);
     return FLEXB_SUCCESS;
 }
 
@@ -417,7 +418,7 @@ inline int snf_flexb_vec_get_ref(const void* root, SNF_flexb_vec *vec, size_t in
 }
 
 inline int snf_flexb_mapsize(const void* root, const SNF_flexb_map* map, uint64_t* num) {
-    *num = map->vec.length;
+    *num = map->values.length;
     return FLEXB_SUCCESS;
 }
 
