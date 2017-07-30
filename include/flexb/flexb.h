@@ -167,8 +167,64 @@ inline uint64_t snf_flexb_get_uint64(const void* data, int width) {
     return num;
 }
 
+inline double snf_flexb_get_float(const void* data, int width) {
+    uint64_t num;
+    switch (width) {
+    /*
+    Look into support for half and quarter float
+    case 1:
+        {
+           uint8_t tmp;
+           memcpy(&tmp, data, 1);
+           num = tmp;
+        }
+       break;
+    case 2:
+        {
+           uint16_t tmp;
+           memcpy(&tmp, data, 2);
+           num = tmp;
+        }
+       break;
+    */
+    case 4:
+        {
+           float tmp;
+           memcpy(&tmp, data, 4);
+           num = tmp;
+        }
+       break;
+    case 8:
+        {
+           memcpy(&num, data, 8);
+        }
+       break;
+    default:
+        assert(0);
+    }
+    return num;
+}
+
 inline const void * _snf_flexb_indirect(const void* data, int width) {
     return data - snf_flexb_get_uint64(data, width);
+}
+
+inline int snf_flexb_as_float(void *root, SNF_flexb_ref* ref, double *num) {
+    if (num == NULL || ref == NULL) {
+        return EINVAL;
+    }
+    switch(ref->type) {
+    case FLEXB_FLOAT:
+        *num = snf_flexb_get_float(ref->data, ref->parent_width);
+        return FLEXB_SUCCESS;
+    case FLEXB_INDIRECT_FLOAT:
+        {
+        const void* data = _snf_flexb_indirect(ref->data, ref->parent_width);
+        *num = snf_flexb_get_float(data, ref->byte_width);
+        return FLEXB_SUCCESS;
+        }
+    }
+    return FLEXB_INVALID_CONVERSION;
 }
 
 inline int snf_flexb_as_int64(SNF_flexb_ref* ref, int64_t *num) {

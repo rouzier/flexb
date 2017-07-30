@@ -40,12 +40,15 @@ static char long_uint_bytes[]  = {1,2,3,4,5,6,7,0xff,11,8}; // 0x010000000000000
 static char bad_byte_width[]  = {1,4,3}; // Corrupted byte width
 static char bad_type[]  = {1,108,1}; // Corrupted byte width
 
+static char typed_int_vector[]  = {3,1,2,3,3,44,1}; // [1, 2, 3]
+
 // { vec: [ -100, "Fred", 4.0, false ], bar: [ 1, 2, 3 ], bar3: [ 1, 2, 3 ], foo: 100, bool: true, mymap: { foo: "Fred", sbool1 : "true", sbool2: "false", sbool3: "0", sbool3: "1" } }
 static char map_bytes[]={ 118, 101, 99, 0, 4, 70, 114, 101, 100, 0, 0, 0, 0, 0, 128, 64, 4, 156, 13, 7, 0, 4, 20, 34, 104, 98, 97, 114, 0, 3, 0, 0, 0, 1, 0, 0, 0, 2, 0, 0, 0, 3, 0, 0, 0, 98, 97, 114, 51, 0, 1, 0, 0, 0, 2, 0, 0, 0, 3, 0, 0, 0, 98, 111, 111, 108, 0, 102, 111, 111, 0, 109, 121, 109, 97, 112, 0, 115, 98, 111, 111, 108, 49, 0, 4, 116, 114, 117, 101, 0, 115, 98, 111, 111, 108, 50, 0, 5, 102, 97, 108, 115, 101, 0, 115, 98, 111, 111, 108, 51, 0, 1, 49, 0, 115, 98, 111, 111, 108, 52, 0, 1, 48, 0, 5, 58, 49, 37, 24, 15, 5, 1, 5, 128, 49, 37, 24, 15, 20, 20, 20, 20, 20, 6, 119, 100, 84, 80, 77, 149, 0, 0, 8, 0, 0, 0, 1, 0, 0, 0, 6, 0, 0, 0, 131, 0, 0, 0, 118, 0, 0, 0, 1, 0, 0, 0, 0, 0, 200, 66, 47, 0, 0, 0, 167, 0, 0, 0, 46, 78, 106, 14, 36, 40, 30, 38, 1 };
 
 void int_tests() {
     int64_t num = 0;
     SNF_flexb_ref ref = {};
+
     IS_OK(snf_flexb_set_root(byte_int_bytes, 3, &ref) == 0);
     IS_OK(snf_flexb_as_int64(&ref, &num) == 0);
     IS_OK(num == 1);
@@ -92,18 +95,19 @@ void uint_tests() {
     IS_OK(snf_flexb_set_root(long_uint_bytes, 10, &ref) == 0);
     IS_OK(snf_flexb_as_uint64(&ref, &num) == 0);
     IS_OK(num == 0xff07060504030201);
-
 }
 
 void map_tests() {
     uint64_t num = 0;
     int64_t num2 = 0;
+    double num3 = 0.0;
     const char* str;
-    SNF_flexb_ref ref = {0};
-    SNF_flexb_ref ref2 = {0};
-    SNF_flexb_ref ref3 = {0};
-    SNF_flexb_map map = {{0}, {0}};
-    SNF_flexb_vec vec = {0};
+    SNF_flexb_ref ref  = {};
+    SNF_flexb_ref ref2 = {};
+    SNF_flexb_ref ref3 = {};
+    SNF_flexb_map map  = {};
+    SNF_flexb_vec vec  = {};
+
     IS_OK(snf_flexb_set_root(map_bytes, sizeof(map_bytes), &ref) == 0);
     IS_OK(ref.type == FLEXB_MAP);
     IS_OK(snf_flexb_as_map(map_bytes, &ref, &map) == 0);
@@ -117,18 +121,54 @@ void map_tests() {
     IS_OK(ref2.byte_width == 1);
     IS_OK(snf_flexb_as_vec(map_bytes, &ref2, &vec) == 0);
     IS_OK(vec.length == 4);
+
     IS_OK(snf_flexb_vec_get_ref(map_bytes, &vec, 4, &ref3) != 0);
+
     IS_OK(snf_flexb_vec_get_ref(map_bytes, &vec, 0, &ref3) == 0);
     IS_OK(ref3.type == FLEXB_INT);
     IS_OK(snf_flexb_as_int64(&ref3, &num2) == 0);
     IS_OK(num2 == -100);
+
     IS_OK(snf_flexb_vec_get_ref(map_bytes, &vec, 1, &ref3) == 0);
     IS_OK(ref3.type == FLEXB_STRING);
     IS_OK(snf_flexb_as_str(map_bytes, &ref3, &str) == 0);
     IS_OK(strcmp(str, "Fred") == 0);
+
     IS_OK(snf_flexb_as_blob(map_bytes, &ref3, &str, &num) == 0);
     IS_OK(strcmp(str, "Fred") == 0);
     IS_OK(num == 4);
+
+    IS_OK(snf_flexb_vec_get_ref(map_bytes, &vec, 2, &ref3) == 0);
+    IS_OK(ref3.type == FLEXB_INDIRECT_FLOAT);
+    IS_OK(snf_flexb_as_float(map_bytes, &ref3, &num3) == 0);
+    IS_OK(num3 == 4.0);
+}
+
+
+void vec_tests() {
+    uint64_t num = 0;
+    SNF_flexb_ref ref = {};
+    SNF_flexb_ref ref2 = {};
+    SNF_flexb_vec vec = {};
+
+    IS_OK(snf_flexb_set_root(typed_int_vector, 7, &ref) == 0);
+    IS_OK(snf_flexb_as_vec(typed_int_vector, &ref, &vec) == 0);
+    IS_OK(ref.type == FLEXB_VECTOR_INT);
+    IS_OK(ref.byte_width == 1);
+    IS_OK(ref.parent_width == 1);
+    IS_OK(ref.data == (4 + typed_int_vector));
+
+    IS_OK(snf_flexb_vec_get_ref(map_bytes, &vec, 0, &ref2) == 0);
+    IS_OK(snf_flexb_as_uint64(&ref2, &num) == 0);
+    IS_OK(num == 1);
+
+    IS_OK(snf_flexb_vec_get_ref(map_bytes, &vec, 1, &ref2) == 0);
+    IS_OK(snf_flexb_as_uint64(&ref2, &num) == 0);
+    IS_OK(num == 2);
+
+    IS_OK(snf_flexb_vec_get_ref(map_bytes, &vec, 2, &ref2) == 0);
+    IS_OK(snf_flexb_as_uint64(&ref2, &num) == 0);
+    IS_OK(num == 3);
 }
 
 void bad_data () {
@@ -143,6 +183,7 @@ int main() {
     int_tests();
     uint_tests();
     map_tests();
+    vec_tests();
     bad_data();
 
     if (tests_failed) {
