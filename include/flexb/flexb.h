@@ -478,4 +478,6 @@ inline int flexb_mapsize(const void* root, const FLEXB_map* map, uint64_t* num) 
     return FLEXB_SUCCESS;
 }
 
+#undef SET_REF
+
 #endif
