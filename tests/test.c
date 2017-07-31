@@ -47,53 +47,53 @@ static char map_bytes[]={ 118, 101, 99, 0, 4, 70, 114, 101, 100, 0, 0, 0, 0, 0, 
 
 void int_tests() {
     int64_t num = 0;
-    SNF_flexb_ref ref = {};
+    FLEXB_ref ref = {};
 
-    IS_OK(snf_flexb_set_root(byte_int_bytes, 3, &ref) == 0);
-    IS_OK(snf_flexb_as_int64(&ref, &num) == 0);
+    IS_OK(flexb_set_root(byte_int_bytes, 3, &ref) == 0);
+    IS_OK(flexb_as_int64(&ref, &num) == 0);
     IS_OK(num == 1);
 
-    IS_OK(snf_flexb_set_root(short_int_bytes, 4, &ref) == 0);
-    IS_OK(snf_flexb_as_int64(&ref, &num) == 0);
+    IS_OK(flexb_set_root(short_int_bytes, 4, &ref) == 0);
+    IS_OK(flexb_as_int64(&ref, &num) == 0);
     IS_OK(num == 0x0201);
 
-    IS_OK(snf_flexb_set_root(int_bytes, 6, &ref) == 0);
-    IS_OK(snf_flexb_as_int64(&ref, &num) == 0);
+    IS_OK(flexb_set_root(int_bytes, 6, &ref) == 0);
+    IS_OK(flexb_as_int64(&ref, &num) == 0);
     IS_OK(num == 0x04030201);
 
-    IS_OK(snf_flexb_set_root(long_int_bytes, 10, &ref) == 0);
-    IS_OK(snf_flexb_as_int64(&ref, &num) == 0);
+    IS_OK(flexb_set_root(long_int_bytes, 10, &ref) == 0);
+    IS_OK(flexb_as_int64(&ref, &num) == 0);
     IS_OK(num == 0x0807060504030201);
 
-    IS_OK(snf_flexb_set_root(byte_neg_int_bytes, 3, &ref) == 0);
-    IS_OK(snf_flexb_as_int64(&ref, &num) == 0);
+    IS_OK(flexb_set_root(byte_neg_int_bytes, 3, &ref) == 0);
+    IS_OK(flexb_as_int64(&ref, &num) == 0);
     IS_OK(num == -1);
 
-    IS_OK(snf_flexb_set_root(byte_uint_bytes, 3, &ref) == 0);
-    IS_OK(snf_flexb_as_int64(&ref, &num) == 0);
+    IS_OK(flexb_set_root(byte_uint_bytes, 3, &ref) == 0);
+    IS_OK(flexb_as_int64(&ref, &num) == 0);
     IS_OK(num == 0xff);
 
-    IS_OK(snf_flexb_set_root(byte_int_indirect_bytes, 4, &ref) == 0);
-    IS_OK(snf_flexb_as_int64(&ref, &num) == 0);
+    IS_OK(flexb_set_root(byte_int_indirect_bytes, 4, &ref) == 0);
+    IS_OK(flexb_as_int64(&ref, &num) == 0);
     IS_OK(num == 1);
 }
 
 void uint_tests() {
     uint64_t num = 0;
-    SNF_flexb_ref ref = {};
-    IS_OK(snf_flexb_set_root(byte_uint_bytes, 3, &ref) == 0);
-    IS_OK(snf_flexb_as_uint64(&ref, &num) == 0);
+    FLEXB_ref ref = {};
+    IS_OK(flexb_set_root(byte_uint_bytes, 3, &ref) == 0);
+    IS_OK(flexb_as_uint64(&ref, &num) == 0);
 
-    IS_OK(snf_flexb_set_root(short_uint_bytes, 4, &ref) == 0);
-    IS_OK(snf_flexb_as_uint64(&ref, &num) == 0);
+    IS_OK(flexb_set_root(short_uint_bytes, 4, &ref) == 0);
+    IS_OK(flexb_as_uint64(&ref, &num) == 0);
     IS_OK(num == 0xff01);
 
-    IS_OK(snf_flexb_set_root(uint_bytes, 6, &ref) == 0);
-    IS_OK(snf_flexb_as_uint64(&ref, &num) == 0);
+    IS_OK(flexb_set_root(uint_bytes, 6, &ref) == 0);
+    IS_OK(flexb_as_uint64(&ref, &num) == 0);
     IS_OK(num == 0xff030201);
 
-    IS_OK(snf_flexb_set_root(long_uint_bytes, 10, &ref) == 0);
-    IS_OK(snf_flexb_as_uint64(&ref, &num) == 0);
+    IS_OK(flexb_set_root(long_uint_bytes, 10, &ref) == 0);
+    IS_OK(flexb_as_uint64(&ref, &num) == 0);
     IS_OK(num == 0xff07060504030201);
 }
 
@@ -102,79 +102,79 @@ void map_tests() {
     int64_t num2 = 0;
     double num3 = 0.0;
     const char* str;
-    SNF_flexb_ref ref  = {};
-    SNF_flexb_ref ref2 = {};
-    SNF_flexb_ref ref3 = {};
-    SNF_flexb_map map  = {};
-    SNF_flexb_vec vec  = {};
+    FLEXB_ref ref  = {};
+    FLEXB_ref ref2 = {};
+    FLEXB_ref ref3 = {};
+    FLEXB_map map  = {};
+    FLEXB_vec vec  = {};
 
-    IS_OK(snf_flexb_set_root(map_bytes, sizeof(map_bytes), &ref) == 0);
+    IS_OK(flexb_set_root(map_bytes, sizeof(map_bytes), &ref) == 0);
     IS_OK(ref.type == FLEXB_MAP);
-    IS_OK(snf_flexb_as_map(map_bytes, &ref, &map) == 0);
+    IS_OK(flexb_as_map(map_bytes, &ref, &map) == 0);
     IS_OK((ref.data - map.values.data) == 30);
     IS_OK(map.values.byte_width == 4);
-    IS_OK(snf_flexb_mapsize(map_bytes, &map, &num) == 0);
+    IS_OK(flexb_mapsize(map_bytes, &map, &num) == 0);
     IS_OK(num == 6);
-    IS_OK(snf_flexb_map_get_ref(map_bytes, &map, "vec", &ref2) == 0);
+    IS_OK(flexb_map_get_ref(map_bytes, &map, "vec", &ref2) == 0);
     IS_OK(ref2.type == FLEXB_VECTOR);
     IS_OK(ref2.parent_width == map.values.byte_width);
     IS_OK(ref2.byte_width == 1);
-    IS_OK(snf_flexb_as_vec(map_bytes, &ref2, &vec) == 0);
+    IS_OK(flexb_as_vec(map_bytes, &ref2, &vec) == 0);
     IS_OK(vec.length == 4);
 
-    IS_OK(snf_flexb_vec_get_ref(map_bytes, &vec, 4, &ref3) != 0);
+    IS_OK(flexb_vec_get_ref(map_bytes, &vec, 4, &ref3) != 0);
 
-    IS_OK(snf_flexb_vec_get_ref(map_bytes, &vec, 0, &ref3) == 0);
+    IS_OK(flexb_vec_get_ref(map_bytes, &vec, 0, &ref3) == 0);
     IS_OK(ref3.type == FLEXB_INT);
-    IS_OK(snf_flexb_as_int64(&ref3, &num2) == 0);
+    IS_OK(flexb_as_int64(&ref3, &num2) == 0);
     IS_OK(num2 == -100);
 
-    IS_OK(snf_flexb_vec_get_ref(map_bytes, &vec, 1, &ref3) == 0);
+    IS_OK(flexb_vec_get_ref(map_bytes, &vec, 1, &ref3) == 0);
     IS_OK(ref3.type == FLEXB_STRING);
-    IS_OK(snf_flexb_as_str(map_bytes, &ref3, &str) == 0);
+    IS_OK(flexb_as_str(map_bytes, &ref3, &str) == 0);
     IS_OK(strcmp(str, "Fred") == 0);
 
-    IS_OK(snf_flexb_as_blob(map_bytes, &ref3, &str, &num) == 0);
+    IS_OK(flexb_as_blob(map_bytes, &ref3, &str, &num) == 0);
     IS_OK(strcmp(str, "Fred") == 0);
     IS_OK(num == 4);
 
-    IS_OK(snf_flexb_vec_get_ref(map_bytes, &vec, 2, &ref3) == 0);
+    IS_OK(flexb_vec_get_ref(map_bytes, &vec, 2, &ref3) == 0);
     IS_OK(ref3.type == FLEXB_INDIRECT_FLOAT);
-    IS_OK(snf_flexb_as_float(map_bytes, &ref3, &num3) == 0);
+    IS_OK(flexb_as_float(map_bytes, &ref3, &num3) == 0);
     IS_OK(num3 == 4.0);
 }
 
 
 void vec_tests() {
     uint64_t num = 0;
-    SNF_flexb_ref ref = {};
-    SNF_flexb_ref ref2 = {};
-    SNF_flexb_vec vec = {};
+    FLEXB_ref ref = {};
+    FLEXB_ref ref2 = {};
+    FLEXB_vec vec = {};
 
-    IS_OK(snf_flexb_set_root(typed_int_vector, 7, &ref) == 0);
-    IS_OK(snf_flexb_as_vec(typed_int_vector, &ref, &vec) == 0);
+    IS_OK(flexb_set_root(typed_int_vector, 7, &ref) == 0);
+    IS_OK(flexb_as_vec(typed_int_vector, &ref, &vec) == 0);
     IS_OK(ref.type == FLEXB_VECTOR_INT);
     IS_OK(ref.byte_width == 1);
     IS_OK(ref.parent_width == 1);
     IS_OK(ref.data == (4 + typed_int_vector));
 
-    IS_OK(snf_flexb_vec_get_ref(map_bytes, &vec, 0, &ref2) == 0);
-    IS_OK(snf_flexb_as_uint64(&ref2, &num) == 0);
+    IS_OK(flexb_vec_get_ref(map_bytes, &vec, 0, &ref2) == 0);
+    IS_OK(flexb_as_uint64(&ref2, &num) == 0);
     IS_OK(num == 1);
 
-    IS_OK(snf_flexb_vec_get_ref(map_bytes, &vec, 1, &ref2) == 0);
-    IS_OK(snf_flexb_as_uint64(&ref2, &num) == 0);
+    IS_OK(flexb_vec_get_ref(map_bytes, &vec, 1, &ref2) == 0);
+    IS_OK(flexb_as_uint64(&ref2, &num) == 0);
     IS_OK(num == 2);
 
-    IS_OK(snf_flexb_vec_get_ref(map_bytes, &vec, 2, &ref2) == 0);
-    IS_OK(snf_flexb_as_uint64(&ref2, &num) == 0);
+    IS_OK(flexb_vec_get_ref(map_bytes, &vec, 2, &ref2) == 0);
+    IS_OK(flexb_as_uint64(&ref2, &num) == 0);
     IS_OK(num == 3);
 }
 
 void bad_data () {
-    SNF_flexb_ref ref = {};
-    IS_OK(snf_flexb_set_root(bad_byte_width, 3, &ref) == FLEXB_CORRUPTED);
-    IS_OK(snf_flexb_set_root(bad_type, 3, &ref) == FLEXB_CORRUPTED);
+    FLEXB_ref ref = {};
+    IS_OK(flexb_set_root(bad_byte_width, 3, &ref) == FLEXB_CORRUPTED);
+    IS_OK(flexb_set_root(bad_type, 3, &ref) == FLEXB_CORRUPTED);
 }
 
 

@@ -56,34 +56,34 @@
 } while(0)
 
 
-typedef struct SNF_flexb_ref {
+typedef struct FLEXB_ref {
     const void * data;
     uint8_t parent_width;
     uint8_t byte_width;
     uint8_t type;
-} SNF_flexb_ref;
+} FLEXB_ref;
 
-typedef struct SNF_flexb_obj {
+typedef struct FLEXB_obj {
     const void * data;
     uint8_t byte_width;
-} SNF_flexb_obj;
+} FLEXB_obj;
 
-typedef struct SNF_flexb_vec {
+typedef struct FLEXB_vec {
     const void * data;
     size_t length;
     uint8_t byte_width;
     uint8_t type;
-} SNF_flexb_vec;
+} FLEXB_vec;
 
-typedef struct SNF_flexb_map {
-    SNF_flexb_vec values;
-    SNF_flexb_vec keys;
-} SNF_flexb_map;
+typedef struct FLEXB_map {
+    FLEXB_vec values;
+    FLEXB_vec keys;
+} FLEXB_map;
 
 
-inline const void * _snf_flexb_indirect(const void* data, int width);
+inline const void * _flexb_indirect(const void* data, int width);
 
-inline int snf_flexb_set_root(const void* data, size_t length, SNF_flexb_ref* ref) {
+inline int flexb_set_root(const void* data, size_t length, FLEXB_ref* ref) {
     if (data == NULL || ref == NULL || length < 3) {
         return EINVAL;
     }
@@ -97,7 +97,7 @@ inline int snf_flexb_set_root(const void* data, size_t length, SNF_flexb_ref* re
     return FLEXB_SUCCESS;
 }
 
-inline int64_t snf_flexb_get_int64(const void* data, int width) {
+inline int64_t flexb_get_int64(const void* data, int width) {
     int64_t num;
     switch (width) {
     case 1:
@@ -132,7 +132,7 @@ inline int64_t snf_flexb_get_int64(const void* data, int width) {
     return num;
 }
 
-inline uint64_t snf_flexb_get_uint64(const void* data, int width) {
+inline uint64_t flexb_get_uint64(const void* data, int width) {
     uint64_t num;
     switch (width) {
     case 1:
@@ -167,7 +167,7 @@ inline uint64_t snf_flexb_get_uint64(const void* data, int width) {
     return num;
 }
 
-inline double snf_flexb_get_float(const void* data, int width) {
+inline double flexb_get_float(const void* data, int width) {
     uint64_t num;
     switch (width) {
     /*
@@ -205,49 +205,49 @@ inline double snf_flexb_get_float(const void* data, int width) {
     return num;
 }
 
-inline const void * _snf_flexb_indirect(const void* data, int width) {
-    return data - snf_flexb_get_uint64(data, width);
+inline const void * _flexb_indirect(const void* data, int width) {
+    return data - flexb_get_uint64(data, width);
 }
 
-inline int snf_flexb_as_float(void *root, SNF_flexb_ref* ref, double *num) {
+inline int flexb_as_float(void *root, FLEXB_ref* ref, double *num) {
     if (num == NULL || ref == NULL) {
         return EINVAL;
     }
     switch(ref->type) {
     case FLEXB_FLOAT:
-        *num = snf_flexb_get_float(ref->data, ref->parent_width);
+        *num = flexb_get_float(ref->data, ref->parent_width);
         return FLEXB_SUCCESS;
     case FLEXB_INDIRECT_FLOAT:
         {
-        const void* data = _snf_flexb_indirect(ref->data, ref->parent_width);
-        *num = snf_flexb_get_float(data, ref->byte_width);
+        const void* data = _flexb_indirect(ref->data, ref->parent_width);
+        *num = flexb_get_float(data, ref->byte_width);
         return FLEXB_SUCCESS;
         }
     }
     return FLEXB_INVALID_CONVERSION;
 }
 
-inline int snf_flexb_as_int64(SNF_flexb_ref* ref, int64_t *num) {
+inline int flexb_as_int64(FLEXB_ref* ref, int64_t *num) {
     if (num == NULL || ref == NULL) {
         return EINVAL;
     }
     switch(ref->type) {
     case FLEXB_INT:
-        *num = snf_flexb_get_int64(ref->data, ref->parent_width);
+        *num = flexb_get_int64(ref->data, ref->parent_width);
         return FLEXB_SUCCESS;
     case FLEXB_UINT:
-        *num = (int64_t)snf_flexb_get_uint64(ref->data, ref->parent_width);
+        *num = (int64_t)flexb_get_uint64(ref->data, ref->parent_width);
         return FLEXB_SUCCESS;
     case FLEXB_INDIRECT_INT:
         {
-        const void* data = _snf_flexb_indirect(ref->data, ref->parent_width);
-        *num = snf_flexb_get_int64(data, ref->byte_width);
+        const void* data = _flexb_indirect(ref->data, ref->parent_width);
+        *num = flexb_get_int64(data, ref->byte_width);
         return FLEXB_SUCCESS;
         }
     case FLEXB_INDIRECT_UINT:
         {
-        const void* data = _snf_flexb_indirect(ref->data, ref->parent_width);
-        *num = (int64_t)snf_flexb_get_uint64(data, ref->byte_width);
+        const void* data = _flexb_indirect(ref->data, ref->parent_width);
+        *num = (int64_t)flexb_get_uint64(data, ref->byte_width);
         return FLEXB_SUCCESS;
         }
     case FLEXB_NULL:
@@ -257,27 +257,27 @@ inline int snf_flexb_as_int64(SNF_flexb_ref* ref, int64_t *num) {
     return FLEXB_INVALID_CONVERSION;
 }
 
-inline int snf_flexb_as_uint64(SNF_flexb_ref* ref, uint64_t *num) {
+inline int flexb_as_uint64(FLEXB_ref* ref, uint64_t *num) {
     if (num == NULL || ref == NULL) {
         return EINVAL;
     }
     switch(ref->type) {
     case FLEXB_UINT:
-        *num = snf_flexb_get_uint64(ref->data, ref->parent_width);
+        *num = flexb_get_uint64(ref->data, ref->parent_width);
         return FLEXB_SUCCESS;
     case FLEXB_INT:
-        *num = (uint64_t)snf_flexb_get_int64(ref->data, ref->parent_width);
+        *num = (uint64_t)flexb_get_int64(ref->data, ref->parent_width);
         return FLEXB_SUCCESS;
     case FLEXB_INDIRECT_UINT:
         {
-        const void* data = _snf_flexb_indirect(ref->data, ref->parent_width);
-        *num = snf_flexb_get_uint64(data, ref->byte_width);
+        const void* data = _flexb_indirect(ref->data, ref->parent_width);
+        *num = flexb_get_uint64(data, ref->byte_width);
         return FLEXB_SUCCESS;
         }
     case FLEXB_INDIRECT_INT:
         {
-        const void* data = _snf_flexb_indirect(ref->data, ref->parent_width);
-        *num = (uint64_t)snf_flexb_get_int64(data, ref->byte_width);
+        const void* data = _flexb_indirect(ref->data, ref->parent_width);
+        *num = (uint64_t)flexb_get_int64(data, ref->byte_width);
         return FLEXB_SUCCESS;
         }
     case FLEXB_NULL:
@@ -287,25 +287,25 @@ inline int snf_flexb_as_uint64(SNF_flexb_ref* ref, uint64_t *num) {
     return FLEXB_INVALID_CONVERSION;
 }
 
-inline int snf_flexb_as_bool(const void* root, SNF_flexb_ref* ref, char *boolean) {
+inline int flexb_as_bool(const void* root, FLEXB_ref* ref, char *boolean) {
     if (boolean == NULL || ref == NULL) {
         return EINVAL;
     }
     if (ref->type == FLEXB_BOOL) {
-        *boolean = snf_flexb_get_uint64(ref->data, ref->parent_width) != 0;
+        *boolean = flexb_get_uint64(ref->data, ref->parent_width) != 0;
     }
     uint64_t num = 0;
-    snf_flexb_as_uint64(ref, &num);
+    flexb_as_uint64(ref, &num);
     *boolean = num != 0;
     return FLEXB_SUCCESS;
 }
 
-inline int snf_flexb_as_str(const void* root, SNF_flexb_ref* ref, const char **str) {
+inline int flexb_as_str(const void* root, FLEXB_ref* ref, const char **str) {
     if (str == NULL || ref == NULL) {
         return EINVAL;
     }
     if (ref->type == FLEXB_STRING) {
-        const void* data = _snf_flexb_indirect(ref->data, ref->parent_width);
+        const void* data = _flexb_indirect(ref->data, ref->parent_width);
         if (root != NULL && data < root) {
             return FLEXB_CORRUPTED;
         }
@@ -315,12 +315,12 @@ inline int snf_flexb_as_str(const void* root, SNF_flexb_ref* ref, const char **s
     return FLEXB_INVALID_CONVERSION;
 }
 
-inline int snf_flexb_as_blob(const void* root, SNF_flexb_ref* ref, const char **blob, size_t * length) {
+inline int flexb_as_blob(const void* root, FLEXB_ref* ref, const char **blob, size_t * length) {
     if (length == NULL || blob == NULL || ref == NULL) {
         return EINVAL;
     }
     if (ref->type == FLEXB_STRING || ref->type == FLEXB_BLOB) {
-        const void* data = _snf_flexb_indirect(ref->data, ref->parent_width);
+        const void* data = _flexb_indirect(ref->data, ref->parent_width);
         if (root != NULL && data < root) {
             return FLEXB_CORRUPTED;
         }
@@ -329,20 +329,20 @@ inline int snf_flexb_as_blob(const void* root, SNF_flexb_ref* ref, const char **
             return FLEXB_CORRUPTED;
         }
         *blob = (const char *)data;
-        *length = snf_flexb_get_uint64(size_offset, ref->byte_width);
+        *length = flexb_get_uint64(size_offset, ref->byte_width);
         return FLEXB_SUCCESS;
     }
     return FLEXB_INVALID_CONVERSION;
 }
 
-inline int snf_flexb_as_vec(const void* root, SNF_flexb_ref* ref, SNF_flexb_vec *vec) {
+inline int flexb_as_vec(const void* root, FLEXB_ref* ref, FLEXB_vec *vec) {
     if (ref == NULL || vec == NULL) {
             return EINVAL;
     }
     if (ref->type < FLEXB_MAP || ref->type > FLEXB_VECTOR_FLOAT4) {
         return FLEXB_INVALID_CONVERSION;
     }
-    const void* data = _snf_flexb_indirect(ref->data, ref->parent_width);
+    const void* data = _flexb_indirect(ref->data, ref->parent_width);
     if (root != NULL && data < root) {
         return FLEXB_CORRUPTED;
     }
@@ -357,7 +357,7 @@ inline int snf_flexb_as_vec(const void* root, SNF_flexb_ref* ref, SNF_flexb_vec 
         if (root != NULL && size_offset < root) {
             return FLEXB_CORRUPTED;
         }
-        length = snf_flexb_get_uint64(size_offset, ref->byte_width);
+        length = flexb_get_uint64(size_offset, ref->byte_width);
     }
     // Getting the sub-type if any of the vector
     if (FLEXB_VECTOR_INT <= ref->type && ref->type <= FLEXB_VECTOR_STRING) {
@@ -388,28 +388,28 @@ inline int snf_flexb_as_vec(const void* root, SNF_flexb_ref* ref, SNF_flexb_vec 
     return FLEXB_SUCCESS;
 }
 
-inline int snf_flexb_as_map(const void* root, SNF_flexb_ref* ref, SNF_flexb_map *map) {
+inline int flexb_as_map(const void* root, FLEXB_ref* ref, FLEXB_map *map) {
     if (map == NULL || ref == NULL) {
         return EINVAL;
     }
     int rc = 0;
-    SNF_flexb_vec vec;
+    FLEXB_vec vec;
     if (ref->type !=  FLEXB_MAP) {
         return FLEXB_INVALID_CONVERSION;
     }
-    rc = snf_flexb_as_vec(root, ref, &vec);
+    rc = flexb_as_vec(root, ref, &vec);
     if (rc != FLEXB_SUCCESS) {
         return rc;
     }
-    const void* data = _snf_flexb_indirect(ref->data, ref->parent_width);
+    const void* data = _flexb_indirect(ref->data, ref->parent_width);
     const void* keys_offset = data - (vec.byte_width * 3);
     if (root != NULL && keys_offset < root) {
         return FLEXB_CORRUPTED;
     }
     map->values = vec;
-    map->keys.data = _snf_flexb_indirect(keys_offset, map->values.byte_width);
+    map->keys.data = _flexb_indirect(keys_offset, map->values.byte_width);
     const void* keys_width_offset = keys_offset + map->values.byte_width;
-    map->keys.byte_width = snf_flexb_get_uint64(keys_width_offset, map->values.byte_width);
+    map->keys.byte_width = flexb_get_uint64(keys_width_offset, map->values.byte_width);
     map->keys.type = FLEXB_KEY;
     map->keys.length =  vec.length;
     return FLEXB_SUCCESS;
@@ -417,7 +417,7 @@ inline int snf_flexb_as_map(const void* root, SNF_flexb_ref* ref, SNF_flexb_map 
 
 
 #define CMP_KEY_VECTOR(n) int _cmp_ ## n ## _byte_vector(const void *a, const void* b) {\
-    return strcmp((const char* )a, (const char*)_snf_flexb_indirect(b, n));\
+    return strcmp((const char* )a, (const char*)_flexb_indirect(b, n));\
 }
 
 CMP_KEY_VECTOR(1)
@@ -425,7 +425,7 @@ CMP_KEY_VECTOR(2)
 CMP_KEY_VECTOR(4)
 CMP_KEY_VECTOR(8)
 
-inline int snf_flexb_map_get_ref(const void* root, SNF_flexb_map *map, const char* key, SNF_flexb_ref* ref) {
+inline int flexb_map_get_ref(const void* root, FLEXB_map *map, const char* key, FLEXB_ref* ref) {
     if (map == NULL || key == NULL || ref == NULL) {
         return EINVAL;
     }
@@ -456,7 +456,7 @@ inline int snf_flexb_map_get_ref(const void* root, SNF_flexb_map *map, const cha
     return FLEXB_SUCCESS;
 }
 
-inline int snf_flexb_vec_get_ref(const void* root, SNF_flexb_vec *vec, size_t index, SNF_flexb_ref* ref) {
+inline int flexb_vec_get_ref(const void* root, FLEXB_vec *vec, size_t index, FLEXB_ref* ref) {
     if (vec == NULL || ref == NULL) {
         return EINVAL;
     }
@@ -473,7 +473,7 @@ inline int snf_flexb_vec_get_ref(const void* root, SNF_flexb_vec *vec, size_t in
     return FLEXB_SUCCESS;
 }
 
-inline int snf_flexb_mapsize(const void* root, const SNF_flexb_map* map, uint64_t* num) {
+inline int flexb_mapsize(const void* root, const FLEXB_map* map, uint64_t* num) {
     *num = map->values.length;
     return FLEXB_SUCCESS;
 }
