@@ -168,7 +168,7 @@ inline uint64_t flexb_get_uint64(const void* data, int width) {
 }
 
 inline double flexb_get_float(const void* data, int width) {
-    uint64_t num;
+    double num;
     switch (width) {
     /*
     Look into support for half and quarter float
