@@ -63,11 +63,6 @@ typedef struct FLEXB_ref {
     uint8_t type;
 } FLEXB_ref;
 
-typedef struct FLEXB_obj {
-    const void * data;
-    uint8_t byte_width;
-} FLEXB_obj;
-
 typedef struct FLEXB_vec {
     const void * data;
     size_t length;
@@ -80,14 +75,22 @@ typedef struct FLEXB_map {
     FLEXB_vec keys;
 } FLEXB_map;
 
+typedef struct FLEXB_root {
+    const void * start;
+    const void * end;
+} FLEXB_root;
 
 inline const void * _flexb_indirect(const void* data, int width);
 
-inline int flexb_set_root(const void* data, size_t length, FLEXB_ref* ref) {
+inline int flexb_set_root(const void* data, size_t length, FLEXB_root *root, FLEXB_ref* ref) {
     if (data == NULL || ref == NULL || length < 3) {
         return EINVAL;
     }
     const uint8_t* end = (const uint8_t*)((const uint8_t*)data + length);
+    if (root != NULL) {
+        root->start = data;
+        root->end = end;
+    }
     const uint8_t byte_width = (uint8_t) *--end;
     if (byte_width != 1 && byte_width != 2 && byte_width != 4 && byte_width != 8) {
         return FLEXB_CORRUPTED;

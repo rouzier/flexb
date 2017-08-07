@@ -50,31 +50,31 @@ void int_tests() {
     int64_t num = 0;
     FLEXB_ref ref = {};
 
-    IS_OK(flexb_set_root(byte_int_bytes, 3, &ref) == 0);
+    IS_OK(flexb_set_root(byte_int_bytes, 3, NULL, &ref) == 0);
     IS_OK(flexb_as_int64(&ref, &num) == 0);
     IS_OK(num == 1);
 
-    IS_OK(flexb_set_root(short_int_bytes, 4, &ref) == 0);
+    IS_OK(flexb_set_root(short_int_bytes, 4, NULL, &ref) == 0);
     IS_OK(flexb_as_int64(&ref, &num) == 0);
     IS_OK(num == 0x0201);
 
-    IS_OK(flexb_set_root(int_bytes, 6, &ref) == 0);
+    IS_OK(flexb_set_root(int_bytes, 6, NULL, &ref) == 0);
     IS_OK(flexb_as_int64(&ref, &num) == 0);
     IS_OK(num == 0x04030201);
 
-    IS_OK(flexb_set_root(long_int_bytes, 10, &ref) == 0);
+    IS_OK(flexb_set_root(long_int_bytes, 10, NULL, &ref) == 0);
     IS_OK(flexb_as_int64(&ref, &num) == 0);
     IS_OK(num == 0x0807060504030201);
 
-    IS_OK(flexb_set_root(byte_neg_int_bytes, 3, &ref) == 0);
+    IS_OK(flexb_set_root(byte_neg_int_bytes, 3, NULL, &ref) == 0);
     IS_OK(flexb_as_int64(&ref, &num) == 0);
     IS_OK(num == -1);
 
-    IS_OK(flexb_set_root(byte_uint_bytes, 3, &ref) == 0);
+    IS_OK(flexb_set_root(byte_uint_bytes, 3, NULL, &ref) == 0);
     IS_OK(flexb_as_int64(&ref, &num) == 0);
     IS_OK(num == 0xff);
 
-    IS_OK(flexb_set_root(byte_int_indirect_bytes, 4, &ref) == 0);
+    IS_OK(flexb_set_root(byte_int_indirect_bytes, 4, NULL, &ref) == 0);
     IS_OK(flexb_as_int64(&ref, &num) == 0);
     IS_OK(num == 1);
 }
@@ -82,18 +82,18 @@ void int_tests() {
 void uint_tests() {
     uint64_t num = 0;
     FLEXB_ref ref = {};
-    IS_OK(flexb_set_root(byte_uint_bytes, 3, &ref) == 0);
+    IS_OK(flexb_set_root(byte_uint_bytes, 3, NULL, &ref) == 0);
     IS_OK(flexb_as_uint64(&ref, &num) == 0);
 
-    IS_OK(flexb_set_root(short_uint_bytes, 4, &ref) == 0);
+    IS_OK(flexb_set_root(short_uint_bytes, 4, NULL, &ref) == 0);
     IS_OK(flexb_as_uint64(&ref, &num) == 0);
     IS_OK(num == 0xff01);
 
-    IS_OK(flexb_set_root(uint_bytes, 6, &ref) == 0);
+    IS_OK(flexb_set_root(uint_bytes, 6, NULL, &ref) == 0);
     IS_OK(flexb_as_uint64(&ref, &num) == 0);
     IS_OK(num == 0xff030201);
 
-    IS_OK(flexb_set_root(long_uint_bytes, 10, &ref) == 0);
+    IS_OK(flexb_set_root(long_uint_bytes, 10, NULL, &ref) == 0);
     IS_OK(flexb_as_uint64(&ref, &num) == 0);
     IS_OK(num == 0xff07060504030201);
 }
@@ -109,7 +109,7 @@ void map_tests() {
     FLEXB_map map  = {};
     FLEXB_vec vec  = {};
 
-    IS_OK(flexb_set_root(map_bytes, sizeof(map_bytes), &ref) == 0);
+    IS_OK(flexb_set_root(map_bytes, sizeof(map_bytes), NULL, &ref) == 0);
     IS_OK(ref.type == FLEXB_MAP);
     IS_OK(flexb_as_map(map_bytes, &ref, &map) == 0);
     IS_OK((ref.data - map.values.data) == 30);
@@ -152,7 +152,7 @@ void vec_tests() {
     FLEXB_ref ref2 = {};
     FLEXB_vec vec = {};
 
-    IS_OK(flexb_set_root(typed_int_vector, 7, &ref) == 0);
+    IS_OK(flexb_set_root(typed_int_vector, 7, NULL, &ref) == 0);
     IS_OK(flexb_as_vec(typed_int_vector, &ref, &vec) == 0);
     IS_OK(ref.type == FLEXB_VECTOR_INT);
     IS_OK(ref.byte_width == 1);
@@ -171,7 +171,7 @@ void vec_tests() {
     IS_OK(flexb_as_uint64(&ref2, &num) == 0);
     IS_OK(num == 3);
 
-    IS_OK(flexb_set_root(typed_int3_vector, 6, &ref) == 0);
+    IS_OK(flexb_set_root(typed_int3_vector, 6, NULL, &ref) == 0);
     IS_OK(flexb_as_vec(typed_int3_vector, &ref, &vec) == 0);
     IS_OK(ref.type == FLEXB_VECTOR_UINT3);
     IS_OK(ref.byte_width == 1);
@@ -193,8 +193,8 @@ void vec_tests() {
 
 void bad_data () {
     FLEXB_ref ref = {};
-    IS_OK(flexb_set_root(bad_byte_width, 3, &ref) == FLEXB_CORRUPTED);
-    IS_OK(flexb_set_root(bad_type, 3, &ref) == FLEXB_CORRUPTED);
+    IS_OK(flexb_set_root(bad_byte_width, 3, NULL, &ref) == FLEXB_CORRUPTED);
+    IS_OK(flexb_set_root(bad_type, 3, NULL, &ref) == FLEXB_CORRUPTED);
 }
 
 
