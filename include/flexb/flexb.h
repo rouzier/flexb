@@ -97,7 +97,7 @@ inline int flexb_set_root(const void* data, size_t length, FLEXB_ref* ref) {
     return FLEXB_SUCCESS;
 }
 
-inline int64_t flexb_get_int64(const void* data, int width) {
+inline int64_t _flexb_get_int64(const void* data, int width) {
     int64_t num;
     switch (width) {
     case 1:
@@ -132,7 +132,7 @@ inline int64_t flexb_get_int64(const void* data, int width) {
     return num;
 }
 
-inline uint64_t flexb_get_uint64(const void* data, int width) {
+inline uint64_t _flexb_get_uint64(const void* data, int width) {
     uint64_t num;
     switch (width) {
     case 1:
@@ -206,7 +206,7 @@ inline double flexb_get_float(const void* data, int width) {
 }
 
 inline const void * _flexb_indirect(const void* data, int width) {
-    return data - flexb_get_uint64(data, width);
+    return data - _flexb_get_uint64(data, width);
 }
 
 inline int flexb_as_float(void *root, FLEXB_ref* ref, double *num) {
@@ -227,27 +227,27 @@ inline int flexb_as_float(void *root, FLEXB_ref* ref, double *num) {
     return FLEXB_INVALID_CONVERSION;
 }
 
-inline int flexb_as_int64(FLEXB_ref* ref, int64_t *num) {
+inline int flexb_as_int64(const FLEXB_ref* ref, int64_t *num) {
     if (num == NULL || ref == NULL) {
         return EINVAL;
     }
     switch(ref->type) {
     case FLEXB_INT:
-        *num = flexb_get_int64(ref->data, ref->parent_width);
+        *num = _flexb_get_int64(ref->data, ref->parent_width);
         return FLEXB_SUCCESS;
     case FLEXB_UINT:
-        *num = (int64_t)flexb_get_uint64(ref->data, ref->parent_width);
+        *num = (int64_t)_flexb_get_uint64(ref->data, ref->parent_width);
         return FLEXB_SUCCESS;
     case FLEXB_INDIRECT_INT:
         {
         const void* data = _flexb_indirect(ref->data, ref->parent_width);
-        *num = flexb_get_int64(data, ref->byte_width);
+        *num = _flexb_get_int64(data, ref->byte_width);
         return FLEXB_SUCCESS;
         }
     case FLEXB_INDIRECT_UINT:
         {
         const void* data = _flexb_indirect(ref->data, ref->parent_width);
-        *num = (int64_t)flexb_get_uint64(data, ref->byte_width);
+        *num = (int64_t)_flexb_get_uint64(data, ref->byte_width);
         return FLEXB_SUCCESS;
         }
     case FLEXB_NULL:
@@ -257,27 +257,27 @@ inline int flexb_as_int64(FLEXB_ref* ref, int64_t *num) {
     return FLEXB_INVALID_CONVERSION;
 }
 
-inline int flexb_as_uint64(FLEXB_ref* ref, uint64_t *num) {
+inline int flexb_as_uint64(const FLEXB_ref* ref, uint64_t *num) {
     if (num == NULL || ref == NULL) {
         return EINVAL;
     }
     switch(ref->type) {
     case FLEXB_UINT:
-        *num = flexb_get_uint64(ref->data, ref->parent_width);
+        *num = _flexb_get_uint64(ref->data, ref->parent_width);
         return FLEXB_SUCCESS;
     case FLEXB_INT:
-        *num = (uint64_t)flexb_get_int64(ref->data, ref->parent_width);
+        *num = (uint64_t)_flexb_get_int64(ref->data, ref->parent_width);
         return FLEXB_SUCCESS;
     case FLEXB_INDIRECT_UINT:
         {
         const void* data = _flexb_indirect(ref->data, ref->parent_width);
-        *num = flexb_get_uint64(data, ref->byte_width);
+        *num = _flexb_get_uint64(data, ref->byte_width);
         return FLEXB_SUCCESS;
         }
     case FLEXB_INDIRECT_INT:
         {
         const void* data = _flexb_indirect(ref->data, ref->parent_width);
-        *num = (uint64_t)flexb_get_int64(data, ref->byte_width);
+        *num = (uint64_t)_flexb_get_int64(data, ref->byte_width);
         return FLEXB_SUCCESS;
         }
     case FLEXB_NULL:
@@ -287,12 +287,12 @@ inline int flexb_as_uint64(FLEXB_ref* ref, uint64_t *num) {
     return FLEXB_INVALID_CONVERSION;
 }
 
-inline int flexb_as_bool(const void* root, FLEXB_ref* ref, char *boolean) {
+inline int flexb_as_bool(const void* root, const FLEXB_ref* ref, char *boolean) {
     if (boolean == NULL || ref == NULL) {
         return EINVAL;
     }
     if (ref->type == FLEXB_BOOL) {
-        *boolean = flexb_get_uint64(ref->data, ref->parent_width) != 0;
+        *boolean = _flexb_get_uint64(ref->data, ref->parent_width) != 0;
     }
     uint64_t num = 0;
     flexb_as_uint64(ref, &num);
@@ -300,7 +300,7 @@ inline int flexb_as_bool(const void* root, FLEXB_ref* ref, char *boolean) {
     return FLEXB_SUCCESS;
 }
 
-inline int flexb_as_str(const void* root, FLEXB_ref* ref, const char **str) {
+inline int flexb_as_str(const void* root, const FLEXB_ref* ref, const char **str) {
     if (str == NULL || ref == NULL) {
         return EINVAL;
     }
@@ -315,7 +315,7 @@ inline int flexb_as_str(const void* root, FLEXB_ref* ref, const char **str) {
     return FLEXB_INVALID_CONVERSION;
 }
 
-inline int flexb_as_blob(const void* root, FLEXB_ref* ref, const char **blob, size_t * length) {
+inline int flexb_as_blob(const void* root, const FLEXB_ref* ref, const char **blob, size_t * length) {
     if (length == NULL || blob == NULL || ref == NULL) {
         return EINVAL;
     }
@@ -329,13 +329,13 @@ inline int flexb_as_blob(const void* root, FLEXB_ref* ref, const char **blob, si
             return FLEXB_CORRUPTED;
         }
         *blob = (const char *)data;
-        *length = flexb_get_uint64(size_offset, ref->byte_width);
+        *length = _flexb_get_uint64(size_offset, ref->byte_width);
         return FLEXB_SUCCESS;
     }
     return FLEXB_INVALID_CONVERSION;
 }
 
-inline int flexb_as_vec(const void* root, FLEXB_ref* ref, FLEXB_vec *vec) {
+inline int flexb_as_vec(const void* root, const FLEXB_ref* ref, FLEXB_vec *vec) {
     if (ref == NULL || vec == NULL) {
             return EINVAL;
     }
@@ -357,7 +357,7 @@ inline int flexb_as_vec(const void* root, FLEXB_ref* ref, FLEXB_vec *vec) {
         if (root != NULL && size_offset < root) {
             return FLEXB_CORRUPTED;
         }
-        length = flexb_get_uint64(size_offset, ref->byte_width);
+        length = _flexb_get_uint64(size_offset, ref->byte_width);
     }
     // Getting the sub-type if any of the vector
     if (FLEXB_VECTOR_INT <= ref->type && ref->type <= FLEXB_VECTOR_STRING) {
@@ -388,7 +388,7 @@ inline int flexb_as_vec(const void* root, FLEXB_ref* ref, FLEXB_vec *vec) {
     return FLEXB_SUCCESS;
 }
 
-inline int flexb_as_map(const void* root, FLEXB_ref* ref, FLEXB_map *map) {
+inline int flexb_as_map(const void* root, const FLEXB_ref* ref, FLEXB_map *map) {
     if (map == NULL || ref == NULL) {
         return EINVAL;
     }
@@ -409,7 +409,7 @@ inline int flexb_as_map(const void* root, FLEXB_ref* ref, FLEXB_map *map) {
     map->values = vec;
     map->keys.data = _flexb_indirect(keys_offset, map->values.byte_width);
     const void* keys_width_offset = keys_offset + map->values.byte_width;
-    map->keys.byte_width = flexb_get_uint64(keys_width_offset, map->values.byte_width);
+    map->keys.byte_width = _flexb_get_uint64(keys_width_offset, map->values.byte_width);
     map->keys.type = FLEXB_KEY;
     map->keys.length =  vec.length;
     return FLEXB_SUCCESS;
@@ -456,7 +456,7 @@ inline int flexb_map_get_ref(const void* root, FLEXB_map *map, const char* key, 
     return FLEXB_SUCCESS;
 }
 
-inline int flexb_vec_get_ref(const void* root, FLEXB_vec *vec, size_t index, FLEXB_ref* ref) {
+inline int flexb_vec_get_ref(const void* root, const FLEXB_vec *vec, size_t index, FLEXB_ref* ref) {
     if (vec == NULL || ref == NULL) {
         return EINVAL;
     }
@@ -476,6 +476,33 @@ inline int flexb_vec_get_ref(const void* root, FLEXB_vec *vec, size_t index, FLE
 inline int flexb_mapsize(const void* root, const FLEXB_map* map, uint64_t* num) {
     *num = map->values.length;
     return FLEXB_SUCCESS;
+}
+
+inline int flexb_is_null(const FLEXB_ref* ref) {
+    return ref != NULL && ref->type == FLEXB_NULL;
+}
+
+inline int flexb_is_vector(const FLEXB_ref* ref) {
+    return ref != NULL && (FLEXB_MAP <= ref->type && ref->type <= FLEXB_VECTOR_FLOAT4);
+}
+
+inline int flexb_is_map(const FLEXB_ref* ref) {
+    return ref != NULL && ref->type == FLEXB_MAP;
+}
+
+inline int flexb_is_numeric(const FLEXB_ref* ref) {
+    return ref != NULL && (
+        (FLEXB_INT <= ref->type && ref->type <= FLEXB_FLOAT) ||
+        (FLEXB_INDIRECT_INT <= ref->type && ref->type <= FLEXB_INDIRECT_FLOAT)
+    );
+}
+
+inline int flexb_is_integer(const FLEXB_ref* ref) {
+    return ref != NULL && FLEXB_INT <= ref->type && (ref->type <= FLEXB_INT || ref->type == FLEXB_INDIRECT_INT);
+}
+
+inline int flexb_is_float(const FLEXB_ref* ref) {
+    return ref != NULL && FLEXB_INT <= ref->type && (ref->type <= FLEXB_FLOAT || ref->type == FLEXB_INDIRECT_FLOAT);
 }
 
 #undef SET_REF
