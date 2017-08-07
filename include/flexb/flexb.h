@@ -55,7 +55,6 @@
     ref->byte_width = 1 << ((PACK_TYPE) & 0x3);\
 } while(0)
 
-
 typedef struct FLEXB_ref {
     const void * data;
     uint8_t parent_width;
@@ -485,12 +484,16 @@ inline int flexb_is_null(const FLEXB_ref* ref) {
     return ref != NULL && ref->type == FLEXB_NULL;
 }
 
-inline int flexb_is_vector(const FLEXB_ref* ref) {
-    return ref != NULL && (FLEXB_MAP <= ref->type && ref->type <= FLEXB_VECTOR_FLOAT4);
+inline int flexb_is_int(const FLEXB_ref* ref) {
+    return ref != NULL && (ref->type <= FLEXB_INT || ref->type == FLEXB_INDIRECT_INT);
 }
 
-inline int flexb_is_map(const FLEXB_ref* ref) {
-    return ref != NULL && ref->type == FLEXB_MAP;
+inline int flexb_is_uint(const FLEXB_ref* ref) {
+    return ref != NULL && (ref->type <= FLEXB_UINT || ref->type == FLEXB_INDIRECT_UINT);
+}
+
+inline int flexb_is_float(const FLEXB_ref* ref) {
+    return ref != NULL && (ref->type <= FLEXB_FLOAT || ref->type == FLEXB_INDIRECT_FLOAT);
 }
 
 inline int flexb_is_numeric(const FLEXB_ref* ref) {
@@ -500,12 +503,36 @@ inline int flexb_is_numeric(const FLEXB_ref* ref) {
     );
 }
 
-inline int flexb_is_integer(const FLEXB_ref* ref) {
-    return ref != NULL && FLEXB_INT <= ref->type && (ref->type <= FLEXB_INT || ref->type == FLEXB_INDIRECT_INT);
+inline int flexb_is_key(const FLEXB_ref* ref) {
+    return ref != NULL && ref->type == FLEXB_KEY;
 }
 
-inline int flexb_is_float(const FLEXB_ref* ref) {
-    return ref != NULL && FLEXB_INT <= ref->type && (ref->type <= FLEXB_FLOAT || ref->type == FLEXB_INDIRECT_FLOAT);
+inline int flexb_is_string(const FLEXB_ref* ref) {
+    return ref != NULL && ref->type == FLEXB_STRING;
+}
+
+inline int flexb_is_map(const FLEXB_ref* ref) {
+    return ref != NULL && ref->type == FLEXB_MAP;
+}
+
+inline int flexb_is_vector(const FLEXB_ref* ref) {
+    return ref != NULL && (FLEXB_MAP <= ref->type && ref->type <= FLEXB_VECTOR_FLOAT4);
+}
+
+inline int flexb_is_typed_vector(const FLEXB_ref* ref) {
+    return ref != NULL && (FLEXB_VECTOR_INT <= ref->type && ref->type <= FLEXB_VECTOR_FLOAT4);
+}
+
+inline int flexb_is_fixed_typed_vector(const FLEXB_ref* ref) {
+    return ref != NULL && (FLEXB_VECTOR_INT2 <= ref->type && ref->type <= FLEXB_VECTOR_FLOAT4);
+}
+
+inline int flexb_is_blob(const FLEXB_ref* ref) {
+    return ref != NULL && ref->type == FLEXB_BLOB;
+}
+
+inline int flexb_is_bool(const FLEXB_ref* ref) {
+    return ref != NULL && ref->type == FLEXB_BOOL;
 }
 
 #undef SET_REF
