@@ -41,6 +41,7 @@ static char bad_byte_width[]  = {1,4,3}; // Corrupted byte width
 static char bad_type[]  = {1,108,1}; // Corrupted byte width
 
 static char typed_int_vector[]  = {3,1,2,3,3,44,1}; // [1, 2, 3]
+static char typed_int3_vector[]  = {1,2,3,3,80,1}; // [1, 2, 3]
 
 // { vec: [ -100, "Fred", 4.0, false ], bar: [ 1, 2, 3 ], bar3: [ 1, 2, 3 ], foo: 100, bool: true, mymap: { foo: "Fred", sbool1 : "true", sbool2: "false", sbool3: "0", sbool3: "1" } }
 static char map_bytes[]={ 118, 101, 99, 0, 4, 70, 114, 101, 100, 0, 0, 0, 0, 0, 128, 64, 4, 156, 13, 7, 0, 4, 20, 34, 104, 98, 97, 114, 0, 3, 0, 0, 0, 1, 0, 0, 0, 2, 0, 0, 0, 3, 0, 0, 0, 98, 97, 114, 51, 0, 1, 0, 0, 0, 2, 0, 0, 0, 3, 0, 0, 0, 98, 111, 111, 108, 0, 102, 111, 111, 0, 109, 121, 109, 97, 112, 0, 115, 98, 111, 111, 108, 49, 0, 4, 116, 114, 117, 101, 0, 115, 98, 111, 111, 108, 50, 0, 5, 102, 97, 108, 115, 101, 0, 115, 98, 111, 111, 108, 51, 0, 1, 49, 0, 115, 98, 111, 111, 108, 52, 0, 1, 48, 0, 5, 58, 49, 37, 24, 15, 5, 1, 5, 128, 49, 37, 24, 15, 20, 20, 20, 20, 20, 6, 119, 100, 84, 80, 77, 149, 0, 0, 8, 0, 0, 0, 1, 0, 0, 0, 6, 0, 0, 0, 131, 0, 0, 0, 118, 0, 0, 0, 1, 0, 0, 0, 0, 0, 200, 66, 47, 0, 0, 0, 167, 0, 0, 0, 46, 78, 106, 14, 36, 40, 30, 38, 1 };
@@ -158,15 +159,34 @@ void vec_tests() {
     IS_OK(ref.parent_width == 1);
     IS_OK(ref.data == (4 + typed_int_vector));
 
-    IS_OK(flexb_vec_get_ref(map_bytes, &vec, 0, &ref2) == 0);
+    IS_OK(flexb_vec_get_ref(typed_int_vector, &vec, 0, &ref2) == 0);
     IS_OK(flexb_as_uint64(&ref2, &num) == 0);
     IS_OK(num == 1);
 
-    IS_OK(flexb_vec_get_ref(map_bytes, &vec, 1, &ref2) == 0);
+    IS_OK(flexb_vec_get_ref(typed_int_vector, &vec, 1, &ref2) == 0);
     IS_OK(flexb_as_uint64(&ref2, &num) == 0);
     IS_OK(num == 2);
 
-    IS_OK(flexb_vec_get_ref(map_bytes, &vec, 2, &ref2) == 0);
+    IS_OK(flexb_vec_get_ref(typed_int_vector, &vec, 2, &ref2) == 0);
+    IS_OK(flexb_as_uint64(&ref2, &num) == 0);
+    IS_OK(num == 3);
+
+    IS_OK(flexb_set_root(typed_int3_vector, 6, &ref) == 0);
+    IS_OK(flexb_as_vec(typed_int3_vector, &ref, &vec) == 0);
+    IS_OK(ref.type == FLEXB_VECTOR_UINT3);
+    IS_OK(ref.byte_width == 1);
+    IS_OK(ref.parent_width == 1);
+    IS_OK(ref.data == (3 + typed_int3_vector));
+
+    IS_OK(flexb_vec_get_ref(typed_int3_vector, &vec, 0, &ref2) == 0);
+    IS_OK(flexb_as_uint64(&ref2, &num) == 0);
+    IS_OK(num == 1);
+
+    IS_OK(flexb_vec_get_ref(typed_int3_vector, &vec, 1, &ref2) == 0);
+    IS_OK(flexb_as_uint64(&ref2, &num) == 0);
+    IS_OK(num == 2);
+
+    IS_OK(flexb_vec_get_ref(typed_int3_vector, &vec, 2, &ref2) == 0);
     IS_OK(flexb_as_uint64(&ref2, &num) == 0);
     IS_OK(num == 3);
 }
