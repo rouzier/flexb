@@ -36,7 +36,7 @@
 #define FLEXB_VECTOR_FLOAT4  24
 #define FLEXB_BLOB 25
 #define FLEXB_BOOL 26
-#define FLEXB_LAST_TYPE FLEXB_BOOL
+#define FLEXB_VECTOR_BOOL 36
 
 #define FLEXB_SUCCESS 0
 
@@ -46,7 +46,7 @@
 
 #define SET_REF(ref, DATA, WIDTH, PACK_TYPE) do { \
     uint8_t type = (PACK_TYPE) >> 2;\
-    if (!(FLEXB_NULL <= type && type <= FLEXB_LAST_TYPE)) {\
+    if (!((FLEXB_NULL <= type && type <= FLEXB_BOOL) || type == FLEXB_VECTOR_BOOL )) {\
         return FLEXB_CORRUPTED;\
     }\
     ref->data = (DATA);\
@@ -516,11 +516,11 @@ inline int flexb_is_map(const FLEXB_ref* ref) {
 }
 
 inline int flexb_is_vector(const FLEXB_ref* ref) {
-    return ref != NULL && (FLEXB_MAP <= ref->type && ref->type <= FLEXB_VECTOR_FLOAT4);
+    return ref != NULL && ((FLEXB_MAP <= ref->type && ref->type <= FLEXB_VECTOR_FLOAT4) || ref->type == FLEXB_VECTOR_BOOL);
 }
 
 inline int flexb_is_typed_vector(const FLEXB_ref* ref) {
-    return ref != NULL && (FLEXB_VECTOR_INT <= ref->type && ref->type <= FLEXB_VECTOR_FLOAT4);
+    return ref != NULL && ((FLEXB_VECTOR_INT <= ref->type && ref->type <= FLEXB_VECTOR_FLOAT4) || ref->type == FLEXB_VECTOR_BOOL);
 }
 
 inline int flexb_is_fixed_typed_vector(const FLEXB_ref* ref) {
