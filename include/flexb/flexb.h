@@ -79,6 +79,11 @@ typedef struct FLEXB_root {
     const void * end;
 } FLEXB_root;
 
+typedef struct _FLEXB_key_cmp {
+    const char* key;
+    uint8_t width;
+} _FLEXB_key_cmp;
+
 inline const void * _flexb_indirect(const void* data, int width);
 
 inline int flexb_set_root(const void* data, size_t length, FLEXB_root *root, FLEXB_ref* ref) {
@@ -417,38 +422,17 @@ inline int flexb_as_map(const void* root, const FLEXB_ref* ref, FLEXB_map *map) 
     return FLEXB_SUCCESS;
 }
 
-
-#define CMP_KEY_VECTOR(n) int _cmp_ ## n ## _byte_vector(const void *a, const void* b) {\
-    return strcmp((const char* )a, (const char*)_flexb_indirect(b, n));\
+int _key_compare(const void *a, const void* b) {
+    _FLEXB_key_cmp *key = (_FLEXB_key_cmp*) a;
+    return strcmp((const char* )key->key, (const char*)_flexb_indirect(b, key->width));
 }
-
-CMP_KEY_VECTOR(1)
-CMP_KEY_VECTOR(2)
-CMP_KEY_VECTOR(4)
-CMP_KEY_VECTOR(8)
 
 inline int flexb_map_get_ref(const void* root, FLEXB_map *map, const char* key, FLEXB_ref* ref) {
     if (map == NULL || key == NULL || ref == NULL) {
         return EINVAL;
     }
-    int (*compar)(const void *, const void *) = NULL;
-    switch(map->keys.byte_width) {
-        case 1:
-            compar = &_cmp_1_byte_vector;
-            break;
-        case 2:
-            compar = &_cmp_2_byte_vector;
-            break;
-        case 4:
-            compar = &_cmp_4_byte_vector;
-            break;
-        case 8:
-            compar = &_cmp_8_byte_vector;
-            break;
-        default:
-            return FLEXB_CORRUPTED;
-    }
-    const void* item = bsearch(key, map->keys.data, map->keys.length, map->keys.byte_width, compar);
+    _FLEXB_key_cmp key_cmp = {key, map->keys.byte_width};
+    const void* item = bsearch(&key_cmp, map->keys.data, map->keys.length, map->keys.byte_width, _key_compare);
     if (item == NULL) {
         return FLEXB_NOT_FOUND;
     }
